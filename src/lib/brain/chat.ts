@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { AIProvider } from "@/lib/ai/provider";
+import type { ResolvedProviders } from "@/lib/ai/resolve";
 import type { ChatMessage } from "@/lib/ai/types";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -50,15 +51,25 @@ function buildContext(hits: RetrievalHit[]): string {
  */
 export async function runChat(
   client: Client,
-  provider: AIProvider,
+  providers: ResolvedProviders | AIProvider,
   input: RunChatInput,
 ): Promise<RunChatResult> {
+  const isResolved = "name" in providers ? false : true;
+  const chat: AIProvider = isResolved
+    ? (providers as ResolvedProviders).chat
+    : (providers as AIProvider);
+  const embedProvider: AIProvider | null = isResolved
+    ? (providers as ResolvedProviders).embed
+    : (providers as AIProvider);
+
   let embedding: number[] | undefined;
-  try {
-    const embed = await provider.embed([input.query]);
-    embedding = embed.vectors[0];
-  } catch {
-    // Provider may not implement embeddings — vector branch will be skipped.
+  if (embedProvider) {
+    try {
+      const embed = await embedProvider.embed([input.query]);
+      embedding = embed.vectors[0];
+    } catch {
+      // Fall through — vector branch will be skipped if embed fails.
+    }
   }
 
   const retrieval = await retrieve(client, {
@@ -87,13 +98,13 @@ export async function runChat(
     { role: "user", content: input.query },
   ];
 
-  const chat = await provider.chat(messages);
+  const response = await chat.chat(messages);
 
   return {
-    answer: chat.text,
+    answer: response.text,
     hits: retrieval.hits,
     emptyRetrieval: false,
-    usage: chat.usage,
-    model: chat.model,
+    usage: response.usage,
+    model: response.model,
   };
 }
