@@ -14,6 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_models: {
+        Row: {
+          cost_priority: number
+          created_at: string
+          enabled: boolean
+          id: string
+          input_cost_per_mtok: number | null
+          max_tokens: number
+          metadata: Json
+          model: string
+          output_cost_per_mtok: number | null
+          priority: number
+          provider: string
+          quality_priority: number
+          task_class: string
+          temperature: number
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          cost_priority?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          input_cost_per_mtok?: number | null
+          max_tokens?: number
+          metadata?: Json
+          model: string
+          output_cost_per_mtok?: number | null
+          priority?: number
+          provider: string
+          quality_priority?: number
+          task_class: string
+          temperature?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          cost_priority?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          input_cost_per_mtok?: number | null
+          max_tokens?: number
+          metadata?: Json
+          model?: string
+          output_cost_per_mtok?: number | null
+          priority?: number
+          provider?: string
+          quality_priority?: number
+          task_class?: string
+          temperature?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_models_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage: {
+        Row: {
+          actor_id: string | null
+          cache_hit: boolean
+          created_at: string
+          duration_ms: number | null
+          estimated_cost: number | null
+          id: string
+          input_tokens: number | null
+          model: string
+          output_tokens: number | null
+          provider: string
+          request_meta: Json
+          task_class: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          estimated_cost?: number | null
+          id?: string
+          input_tokens?: number | null
+          model: string
+          output_tokens?: number | null
+          provider: string
+          request_meta?: Json
+          task_class?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          estimated_cost?: number | null
+          id?: string
+          input_tokens?: number | null
+          model?: string
+          output_tokens?: number | null
+          provider?: string
+          request_meta?: Json
+          task_class?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string

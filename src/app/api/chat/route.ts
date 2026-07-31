@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { resolveProviders } from "@/lib/ai";
-import { runChat } from "@/lib/brain/chat";
+import "@/lib/ai"; // registers providers as side-effect
+import { orchestrate } from "@/lib/ai/orchestrator";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const BodySchema = z.object({
@@ -16,6 +17,13 @@ const BodySchema = z.object({
         content: z.string(),
       }),
     )
+    .optional(),
+  bypassCache: z.boolean().optional(),
+  forceTaskClass: z
+    .enum([
+      "sql", "vector", "memory", "planner", "generation", "summarization",
+      "translation", "extraction", "coding", "conversation",
+    ])
     .optional(),
 });
 
@@ -58,24 +66,27 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let providers;
+  let admin: ReturnType<typeof getSupabaseAdmin> | null = null;
   try {
-    providers = resolveProviders();
-  } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "AI provider unavailable" },
-      { status: 503 },
-    );
+    admin = getSupabaseAdmin();
+  } catch {
+    // admin optional — cost tracking will be skipped
   }
 
   try {
-    const result = await runChat(supabase, providers, {
-      workspaceId,
-      query: body.query,
-      focusNodeId: body.focusNodeId,
-      history: body.history,
-    });
-    return NextResponse.json(result);
+    const response = await orchestrate(
+      {
+        workspaceId,
+        actorId: user.id,
+        query: body.query,
+        focusNodeId: body.focusNodeId,
+        history: body.history,
+        bypassCache: body.bypassCache,
+        forceTaskClass: body.forceTaskClass,
+      },
+      { supabase, admin },
+    );
+    return NextResponse.json(response);
   } catch (err) {
     console.error("[api/chat] error", err);
     return NextResponse.json(
