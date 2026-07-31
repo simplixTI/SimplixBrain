@@ -403,6 +403,7 @@ export type Database = {
           entity_id: string
           entity_kind: string
           id: string
+          node_id: string | null
           workspace_id: string
         }
         Insert: {
@@ -412,6 +413,7 @@ export type Database = {
           entity_id: string
           entity_kind: string
           id?: string
+          node_id?: string | null
           workspace_id: string
         }
         Update: {
@@ -421,9 +423,17 @@ export type Database = {
           entity_id?: string
           entity_kind?: string
           id?: string
+          node_id?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "embeddings_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "embeddings_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1614,6 +1624,19 @@ export type Database = {
     Functions: {
       can_write_workspace: { Args: { ws_id: string }; Returns: boolean }
       is_workspace_member: { Args: { ws_id: string }; Returns: boolean }
+      match_nodes: {
+        Args: {
+          match_count?: number
+          match_kinds?: string[]
+          min_similarity?: number
+          query_embedding: string
+          ws_id: string
+        }
+        Returns: {
+          node_id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

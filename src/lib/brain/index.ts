@@ -4,3 +4,4 @@ export * from "./edges";
 export * from "./inbox";
 export * from "./audit";
 export * from "./retrieval";
+export * from "./chat";

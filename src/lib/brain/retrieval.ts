@@ -161,14 +161,39 @@ async function fromMemories(
 }
 
 async function fromVector(
-  _client: Client,
+  client: Client,
   req: RetrievalRequest,
-  _limit: number,
+  limit: number,
 ): Promise<RetrievalHit[]> {
   if (!req.embedding) return [];
-  // TODO: requires match_nodes RPC (pgvector <=> operator).
-  // Next migration will add: `create function match_nodes(query vector, ws uuid, k int)`.
-  return [];
+
+  const { data, error } = await client.rpc("match_nodes", {
+    query_embedding: req.embedding as unknown as string,
+    ws_id: req.workspaceId,
+    match_kinds: req.kinds ?? undefined,
+    match_count: limit,
+    min_similarity: 0.3,
+  });
+  if (error) throw error;
+
+  const rows = (data ?? []) as Array<{ node_id: string; similarity: number }>;
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((r) => r.node_id);
+  const { data: nodes, error: nErr } = await client
+    .from("nodes")
+    .select("*")
+    .in("id", ids)
+    .is("deleted_at", null);
+  if (nErr) throw nErr;
+
+  const simById = new Map(rows.map((r) => [r.node_id, r.similarity]));
+  return (nodes ?? []).map((node) => ({
+    node,
+    score: simById.get(node.id) ?? 0.5,
+    sources: ["vector"] as HitSource[],
+    reason: `Semântico (sim ${(simById.get(node.id) ?? 0).toFixed(2)})`,
+  }));
 }
 
 function mergeHits(batches: RetrievalHit[][], total: number): RetrievalHit[] {
