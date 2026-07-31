@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light — refined violet-tinted */
+    --background: 260 40% 99%;
+    --foreground: 250 32% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 250 32% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 250 32% 10%;
+    --primary: 265 84% 58%;
+    --primary-foreground: 260 40% 99%;
+    --secondary: 260 30% 95%;
+    --secondary-foreground: 250 32% 14%;
+    --muted: 260 20% 94%;
+    --muted-foreground: 250 12% 42%;
+    --accent: 265 84% 96%;
+    --accent-foreground: 265 84% 32%;
+    --destructive: 346 87% 55%;
+    --destructive-foreground: 260 40% 99%;
+    --border: 260 20% 90%;
+    --input: 260 20% 88%;
+    --ring: 265 84% 58%;
+    --radius: 0.75rem;
+
+    /* Accent hues used for stat/status glow */
+    --hue-violet: 265 84% 62%;
+    --hue-cyan: 190 92% 55%;
+    --hue-lime: 148 78% 50%;
+    --hue-amber: 36 100% 60%;
+    --hue-rose: 346 92% 62%;
+    --hue-indigo: 235 84% 65%;
+    --hue-fuchsia: 300 84% 62%;
+  }
+
+  .dark {
+    /* Dark — electric neural workspace */
+    --background: 240 22% 5%;
+    --foreground: 260 30% 97%;
+    --card: 240 20% 8%;
+    --card-foreground: 260 30% 97%;
+    --popover: 240 22% 8%;
+    --popover-foreground: 260 30% 97%;
+    --primary: 265 84% 68%;
+    --primary-foreground: 260 30% 98%;
+    --secondary: 240 18% 13%;
+    --secondary-foreground: 260 30% 95%;
+    --muted: 240 15% 13%;
+    --muted-foreground: 245 12% 65%;
+    --accent: 265 60% 22%;
+    --accent-foreground: 260 30% 98%;
+    --destructive: 346 90% 62%;
+    --destructive-foreground: 260 30% 98%;
+    --border: 240 15% 16%;
+    --input: 240 15% 16%;
+    --ring: 265 84% 68%;
+
+    --hue-violet: 265 84% 72%;
+    --hue-cyan: 190 92% 62%;
+    --hue-lime: 148 72% 58%;
+    --hue-amber: 36 100% 65%;
+    --hue-rose: 346 92% 68%;
+    --hue-indigo: 235 84% 72%;
+    --hue-fuchsia: 300 84% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(
+        circle at 12% -10%,
+        hsl(var(--hue-violet) / 0.18),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 92% 8%,
+        hsl(var(--hue-cyan) / 0.12),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 110%,
+        hsl(var(--hue-fuchsia) / 0.1),
+        transparent 60%
+      );
+    background-attachment: fixed;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.4);
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  /* Textured card surface — subtle grain via SVG data-uri */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+  }
+
+  /* Glow ring — subtle primary halo */
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.35),
+      0 10px 40px -12px hsl(var(--primary) / 0.4);
+  }
+  .glow-primary-sm {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.25),
+      0 6px 20px -8px hsl(var(--primary) / 0.35);
+  }
+
+  /* Gradient border helper */
+  .surface {
+    position: relative;
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      linear-gradient(
+          140deg,
+          hsl(var(--hue-violet) / 0.35),
+          hsl(var(--hue-cyan) / 0.15) 40%,
+          hsl(var(--border)) 70%
+        )
+        border-box;
+    border: 1px solid transparent;
+  }
+
+  .text-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-feature-settings: "ss01";
+  }
+  .text-display {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.025em;
+  }
+}
+
+@keyframes brain-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(99, 102, 241, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 8px hsl(var(--hue-violet) / 0.7));
+  }
+}
+
+@keyframes idea-pop {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translate(var(--tx-mid, -4px), -8px) scale(1);
+  }
+  100% {
+    transform: translate(var(--tx-end, -12px), -28px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.brain-animate {
+  animation: brain-pulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.idea-spark {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.7);
+  opacity: 0;
+  animation: idea-pop 2.4s ease-out infinite;
+}
+
+.idea-spark--dot {
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.7);
+}
+
+.idea-spark--cyan {
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  box-shadow: 0 0 6px rgba(14, 165, 233, 0.7);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--foreground)) 0%,
+    hsl(var(--hue-violet)) 50%,
+    hsl(var(--foreground)) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s ease-in-out infinite;
+}
